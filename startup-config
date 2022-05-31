@@ -1,0 +1,180 @@
+root@BR1:/opt/rt/etc# more startup-config
+!
+! version core: 2.1.2
+ ! last commit: Sat Aug 20 16:08:35 WIB 2016
+!
+interface ethernet ge0
+ description SW.OS6450:24
+ enable
+ options
+  tso off
+ qlen 1Gbit
+!
+interface ethernet ge1
+ description SW.OS6450:23
+ enable
+ options
+  tso off
+ qlen 1Gbit
+!
+interface ethernet ge2
+ description SW.OS6450:12
+ enable
+ options
+  tso off
+ qlen 1Gbit
+!
+interface ethernet ge3
+ description SW.OS6450:37
+ enable
+ ip address 172.16.20.2/30
+ options
+  tso off
+ qlen 1Gbit
+!
+interface ethernet xe1
+ description SW.OS6450:50
+ enable
+ mtu 9000
+ options
+  smp_affinity auto
+  tso off
+ qlen 10Gbit
+!
+interface vlan ge0.104
+ description PTP.DR1.JKT
+ enable
+ ip address 49.128.183.229/30
+!
+interface vlan ge0.123
+ description ALARM
+ enable
+ ip address 119.2.55.17/30
+!
+interface vlan ge0.2
+ description REMOTE
+ enable
+ ip address 10.1.2.1/28
+!
+interface vlan ge1.112
+ description PTP.BR2.01
+ enable
+ ip address 49.128.183.6/30
+!
+interface vlan ge1.115
+ description PTP.BR4.01
+ enable
+ ip address 49.128.183.245/30
+!
+interface vlan xe1.106
+ description WAHANA
+ enable
+ ip address 58.145.169.13/30
+!
+interface vlan xe1.119
+ description PTP.BR3.01
+ enable
+ ip address 119.2.55.2/30
+!
+interface vlan xe1.125
+ description PTP.BR1.02-02
+ enable
+ ip address 49.128.183.17/30
+!
+interface vlan xe1.127
+ description PTP.BR1.02-01
+ enable
+ ip address 49.128.183.61/30
+!
+interface vlan xe1.151
+ description PALADIN-LUMPIA
+ enable
+ ip address 119.2.55.249/29
+ ip address 49.128.183.249/29
+!
+interface vlan xe1.155
+ description ICT-PWT-INDOSAT
+ enable
+ ip address 49.128.183.105/30
+!
+interface vlan xe1.200
+ description ICT-SRK-INDOSAT
+ enable
+ ip address 49.128.183.181/30
+!
+interface vlan xe1.2752
+ description ICT-SMG-TELKOM
+ enable
+ ip address 49.128.183.205/30
+!
+interface vlan xe1.400
+ description ICT-SBY-INDOSAT
+ enable
+ ip address 119.2.55.137/30
+!
+interface vlan xe1.402
+ description HTS
+ enable
+ ip address 49.128.183.37/30
+!
+interface vlan xe1.404
+ description ICT-MATARAM-INDOSAT
+ enable
+ ip address 119.2.55.165/30
+!
+interface vlan xe1.405
+ description ICT-DPS-INDOSAT
+ enable
+ ip address 119.2.55.97/30
+!
+interface vlan xe1.408
+ description ICT-MLG-INDOSAT
+ enable
+ ip address 49.128.183.141/30
+!
+interface vlan xe1.52
+ description SENTRACOLO
+ enable
+ ip address 103.29.215.17/30
+!
+interface vlan xe1.572
+ description ICT-DPS_XL
+ enable
+ ip address 119.2.55.121/30
+!
+interface vlan xe1.623
+ description MOCHI
+ enable
+ ip address 119.2.55.241/29
+!
+interface vlan xe1.819
+ description IIX-APJII
+ enable
+ ip address 103.28.74.247/23
+!
+interface vlan xe1.821
+ description ICT-SBY-XL
+ enable
+ ip address 119.2.55.133/30
+!
+interface vlan xe1.92
+ description HYPERNET
+ enable
+ ip address 49.128.183.49/30
+!
+interface vlan xe1.920
+ description ICT-YK-XL
+ enable
+ ip address 49.128.183.93/30
+!
+interface vlan xe1.921
+ description ICT-YK-TEL
+ enable
+ ip address 49.128.183.77/30
+!
+interface vlan xe1.93
+ description GARENA
+ enable
+ ip address 103.248.59.250/30
+!
+end

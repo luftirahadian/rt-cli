@@ -1,0 +1,143 @@
+1. Syarat minimal CD (use latest ya)
+    debian-[X].x.x-amd64-netinst.iso
+    current: http://cdimage.debian.org/debian-cd/8.5.0/amd64/iso-cd/debian-8.5.0-amd64-netinst.iso (install latest)
+
+2. Partisi
+Contoh:
+    HDD 500Gb
+    swap    4GB (RAM 4GB - 16GB), 8GB (RAM 16GB - 64GB)
+    /       60GB            (Options: bootable,noatime,nodiratime)
+    /data   Max-Available   (Options: noatime,nodiratime) -> partisi ini optional
+
+3. Install Debian Base (Minimal)
+
+4. edit /etc/apt/source.list
+deb http://ftp.us.debian.org/debian/ jessie main contrib non-free
+deb-src http://ftp.us.debian.org/debian/ jessie main contrib non-free
+
+deb http://httpredir.debian.org/debian jessie-updates main contrib non-free
+deb-src http://httpredir.debian.org/debian jessie-updates main contrib non-free
+
+deb http://security.debian.org/ jessie/updates main contrib non-free
+deb-src http://security.debian.org/ jessie/updates main contrib non-free
+
+5. Update (apt-get update) & Install(apt-get install)
+    -- sudo
+    -- openssh-server
+    -- bash-completion
+    -- vlan
+    -- ethtool
+    -- mtr-tiny
+    -- lsof
+    -- bwm-ng
+    -- iftop
+    -- snmp
+
+6. Catatan
+    -- Upload paket .deb cli & udev_generator.sh (eksekusinya ./udev_generator.sh sebelum nya chmod +x terlebih dahulu filenya biar bisa di eksekusi)
+
+7. Rename interfaces (menggunakan tools - udev_generator.sh tinggal di eksekusi aja ./udev_generator.sh)
+    7.1 Reconfig ip4 address ke interface baru(copy paste hasilnya diatas ke /etc/udev/rules.d/70-net.rules).
+	7.2 Edit file /etc/udev/rules.d/70-persistent-net.rules kasih tanda # setiap line yg diawali SUBSYSTEM (#SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{address}=="00:25:90:5d:f5:17", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth3")
+	7.3 Ganti interface eth0 di /etc/network/interfaces menggunakan ge0.
+    7.4 Reboot
+
+8. Install rtcli (core + conf)
+    9.1 dpkg -i rtcli-core-2.1.2-0.2_amd64.deb
+    9.2 dpkg -i rtcli-conf-1.1-0.6_amd64.deb
+
+9. Tunning sysctl minimal
+# file: /etc/sysctl.conf #
+## Minimal tunning router.
+# IPv6 nya di kasih # (comment)
+# Ip forward = router
+net.ipv4.ip_forward=1
+
+# put at the end of line ya
+# Disable the TCP timestamps option for better CPU utilization:
+# Hanya untuk ipv4!
+net.ipv4.tcp_timestamps = 0
+
+net.core.rmem_max = 16777216
+net.core.wmem_max = 16777216
+net.ipv4.tcp_rmem = 4096 87380 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+net.core.netdev_max_backlog = 250000
+
+10. Config SNMP
+	10.1 file: /etc/default/snmpd
+
+			SNMPDRUN=yes
+
+			# snmpd options (use syslog, close stdin/out/err).
+			#SNMPDOPTS='-Lsd -Lf /dev/null -u snmp -g snmp -I -smux,mteTrigger,mteTriggerConf -p /run/snmpd.pid'
+			SNMPDOPTS='-LS 0-4 d -Lf /dev/null -u snmp -g snmp -p /run/snmpd.pid 127.0.0.1 49.128.183.226'
+
+			TRAPDRUN=no
+
+			TRAPDOPTS='-LS6d -p /var/run/snmptrapd.pid'
+
+	10.2 file:  /etc/snmp/snmpd.conf
+			rocommunity BR.BIRD
+			syslocation IDC-CYBER JKT Lt.7
+			syscontact <noc@gmedia>
+
+11. Tunning Bwm-ng
+# file: /etc/bwm-ng.conf #
+DYNAMIC=1
+UNIT=bits
+TIMEOUT=1000
+
+12. Install Bird
+wget -O - http://bird.network.cz/debian/apt.key | apt-key add -
+apt-get install lsb-release
+echo "deb http://bird.network.cz/debian/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/bird.list
+apt-get update
+apt-get install bird
+update-rc.d bird6 disable
+
+13. Extra untuk router ipv4 only #nano /etc/sysctl.conf (klo mau di hard disable ipv6 optional)
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv6.conf.eth0.disable_ipv6 = 1
+net.ipv6.conf.eth1.disable_ipv6 = 1
+net.ipv6.conf.eth2.disable_ipv6 = 1
+net.ipv6.conf.eth3.disable_ipv6 = 1
+
+14.	Install driver Interface 10Gbps (klo ada)
+
+	15.1 apt-get update && apt-get install firmware-linux-nonfree (optional, install jika menggunakan interface 10Gb nya pakai broadcomm chipsetnya)
+	15.2 apt-get install firmware-bnx2x (optional, install jika menggunakan interface 10Gb nya pakai broadcomm chipsetnya)
+	
+	15.3 Install menggunakan Chipset Intel cek terlebih dahulu chipset yg digunakan menggunakan lspci, dmesg, dmidecode
+	15.4 Setelah dapat baru download drivernya di web Intel. (contoh perangkat superserver : https://downloadcenter.intel.com/download/14687/Network-Adapter-Driver-for-PCI-E-Intel-10-Gigabit-Ethernet-Network-Connections-under-Linux-)
+	15.5 Compile Packet
+		15.5.1 apt-get install linux-headers-$(uname -r)
+		15.5.2 apt-get install gcc make
+		15.5.3 tar xvfvz ixgbe-xxxx.tar.gz
+				cd ixgbe-xxxx/src
+				make
+		15.5.4 Check Drivernya (modinfo ./ixgbe.ko) Perhatikan "depends: ptp,dca,vxlan", klo ada 3 tersebut install paketnya nanti
+		15.5.5 rmmod ixgbe (delete drivernya klo udah ada)
+		15.5.6 modprobe ptp, modprobe dca, modprobe vxlan (eksekusi satu persatu)
+		15.5.7 insmod ./ixgbe.ko (insert module drivernya)
+		15.5.8 Check di /var/log/kernel.log atau syslog atau dmesg memastikan module yg di insert sesuai dengan driver interface 10gbps nya
+		15.5.9 make install (install drivernya)
+		15.5.10 make clean (clear instalasinya)
+		15.5.11 modprobe ixgbe
+		15.5.12 Install driver secara manual bukan dari apt, harus hati" dan jgn di upgrade servernya setelah installasi terutama kernel, update kernel otomatis kudu mengulangi step dari awal dan interface akan tidak terbaca.
+		
+		
+15. Fix Locale Problem (optional)
+export LANGUAGE=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+locale-gen en_US.UTF-8
+dpkg-reconfigure locales
+
+16. Default setiap interface harus di disable tso nya, config dari cli nya.
+
+17. Ketik cli (masuk mode cli untuk update interface, contoh ada di startup-config)
+
+18. Ketik birdc (masuk mode bird routing engine, config bird ada di /etc/bird/bird.conf)
